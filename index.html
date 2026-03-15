@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Early Childhood Resume Tailor</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { font-family: 'Nunito', sans-serif; }
+body { background: #FFF8F0; }
+.gradient-header { background: linear-gradient(135deg, #FF8B94 0%, #FFB347 50%, #87CEEB 100%); }
+.card { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+.btn-primary { background: linear-gradient(135deg, #FF8B94, #FF6B7A); color: white; border-radius: 12px; min-height: 48px; font-weight: 700; transition: all 0.2s; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(255,107,122,0.4); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.btn-secondary { background: linear-gradient(135deg, #87CEEB, #5BB5E0); color: white; border-radius: 12px; min-height: 48px; font-weight: 700; transition: all 0.2s; }
+.btn-secondary:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(91,181,224,0.4); }
+.input-field { border: 2px solid #FFE0C2; border-radius: 12px; padding: 12px 16px; width: 100%; transition: border-color 0.2s; font-size: 16px; }
+.input-field:focus { border-color: #FF8B94; outline: none; box-shadow: 0 0 0 3px rgba(255,139,148,0.15); }
+textarea.input-field { min-height: 100px; resize: vertical; }
+.tab-active { background: #FF8B94; color: white; }
+.tab-inactive { background: #FFF0F0; color: #FF8B94; }
+.step-indicator { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+.step-active { background: #FF8B94; color: white; }
+.step-done { background: #4CAF50; color: white; }
+.step-pending { background: #FFE0C2; color: #CC8844; }
+.fade-in { animation: fadeIn 0.3s ease-in; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.spinner { border: 3px solid #FFE0C2; border-top: 3px solid #FF8B94; border-radius: 50%; width: 24px; height: 24px; animation: spin 0.8s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.pulse { animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.chip { display: inline-block; background: #FFF0F0; color: #FF6B7A; border-radius: 20px; padding: 6px 14px; font-size: 13px; font-weight: 600; margin: 3px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+.chip:hover, .chip.selected { background: #FF8B94; color: white; border-color: #FF6B7A; }
+.output-box { background: #FAFAFA; border: 2px solid #E8E8E8; border-radius: 12px; padding: 16px; white-space: pre-wrap; font-size: 14px; line-height: 1.7; max-height: 60vh; overflow-y: auto; }
+.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 25px; font-size: 14px; font-weight: 600; z-index: 1000; animation: toastIn 0.3s ease; }
+@keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: #FFB347; border-radius: 3px; }
+</style>
+</head>
+<body class="min-h-screen pb-20">
+
+<header class="gradient-header px-4 py-5 text-white text-center sticky top-0 z-50 shadow-md">
+<h1 class="text-xl font-extrabold tracking-tight">🧒 Early Childhood Resume Tailor</h1>
+<p class="text-sm opacity-90 mt-1">Craft standout resumes & cover letters for childcare roles</p>
+</header>
+
+<div id="app" class="max-w-lg mx-auto px-4 py-4">
+
+<!-- Steps indicator -->
+<div id="steps-bar" class="flex items-center justify-center gap-2 mb-6">
+<div class="step-indicator step-active" id="step-ind-1">1</div>
+<div class="w-8 h-1 bg-gray-200 rounded" id="step-line-1"></div>
+<div class="step-indicator step-pending" id="step-ind-2">2</div>
+<div class="w-8 h-1 bg-gray-200 rounded" id="step-line-2"></div>
+<div class="step-indicator step-pending" id="step-ind-3">3</div>
+<div class="w-8 h-1 bg-gray-200 rounded" id="step-line-3"></div>
+<div class="step-indicator step-pending" id="step-ind-4">4</div>
+</div>
+
+<!-- STEP 1: Basic Info -->
+<div id="step-1" class="fade-in">
+<div class="card p-5 mb-4">
+<h2 class="text-lg font-bold text-gray-800 mb-1">👋 Let's start with you!</h2>
+<p class="text-sm text-gray-500 mb-4">Tell us about your background and credentials.</p>
+
+<label class="block text-sm font-bold text-gray-700 mb-1">Full Name *</label>
+<input type="text" id="fullName" class="input-field mb-3" placeholder="e.g., Maria Johnson">
+
+<label class="block text-sm font-bold text-gray-700 mb-1">Email</label>
+<input type="email" id="email" class="input-field mb-3" placeholder="maria@example.com">
+
+<label class="block text-sm font-bold text-gray-700 mb-1">Phone</label>
+<input type="tel" id="phone" class="input-field mb-3" placeholder="(555) 123-4567">
+
+<label class="block text-sm font-bold text-gray-700 mb-1">Location</label>
+<input type="text" id="location" class="input-field mb-3" placeholder="City, State">
+
+<label class="block text-sm font-bold text-gray-700 mb-1">Years of Experience *</label>
+<select id="experience" class="input-field mb-3">
+<option value="">Select...</option>
+<option value="0-1">Less than 1 year</option>
+<option value="1-3">1–3 years</option>
+<option value="3-5">3–5 years</option>
+<option value="5-10">5–10 years</option>
+<option value="10+">10+ years</option>
+</select>
+
+<label class="block text-sm font-bold text-gray-700 mb-1">Education & Certifications *</label>
+<textarea id="education" class="input-field mb-3" placeholder="e.g., CDA credential, Associate's in Early Childhood Ed, CPR/First Aid certified, state childcare license..."></textarea>
+
+<label class="block text-sm font-bold text-gray-700 mb-1">Licenses & Regulatory Compliance</label>
+<textarea id="licenses" class="input-field mb-1" placeholder="e.g., State licensed childcare provider, NAEYC accredited program staff, background check cleared..."></textarea>
+</div>
+<button onclick="goToStep(2)" class="btn-primary w-full py-3 text-base">Continue → Step 2: Experience</button>
+</div>
+
+<!-- STEP 2: Experience & Observations -->
+<div id="step-2" class="fade-in hidden">
+<div class="card p-5 mb-4">
+<h2 class="text-lg font-bold text-gray-800 mb-1">🏫 Your Experience & Outcomes</h2>
+<p class="text-sm text-gray-500 mb-4">Share your work history and child development achievements. Be specific!</p>
+
+<label class="block text-sm font-bold text-gray-700 mb-1">Work History *</label>
+<textarea id="workHistory" class="input-field mb-3" rows="4" placeholder="e.g., Lead Toddler Teacher at Sunshine Daycare (2020–2024): Managed classroom of 12 toddlers ages 18mo–3yrs with 2 assistants..."></textarea>
+
+<label class="block text-sm font-bold text-gray-700 mb-1">🌟 Child Development Outcomes & Observations *</label>
+<p class="text-xs text-gray-400 mb-2">This is where the magic happens! Describe specific outcomes you've facilitated.</p>
+<textarea id="outcomes" class="input-field mb-3" rows="4" placeholder="e.g., Helped 8 out of 10 toddlers achieve toileting readiness by age 2.5. Implemented language-rich circle time that improved vocabulary scores by 30%. Used ASQ-3 screenings to identify 3 children needing early intervention..."></textarea>
+
+<label class="block text-sm font-bold text-gray-700 mb-1">Classroom Artifacts & Methods</label>
+<textarea id="artifacts" class="input-field mb-3" rows="3" placeholder="e.g., Created sensory bins aligned with STEAM curriculum, maintained daily observation logs, designed individualized learning plans for each child..."></textarea>
+
+<label class="block text-sm font-bold text-gray-700 mb-1">Special Skills & Interests</label>
+<div class="flex flex-wrap mb-3" id="skills-chips">
+</div>
+<input type="text" id="customSkill" class="input-field mb-1" placeholder="Type a skill & press Enter to add">
+</div>
+<div class="flex gap-3">
+<button onclick="goToStep(1)" class="btn-secondary flex-1 py-3 text-base">← Back</button>
+<button onclick="goToStep(3)" class="btn-primary flex-1 py-3 text-base">Continue → Step 3</button>
+</div>
+</div>
+
+<!-- STEP 3: Target Role -->
+<div id="step-3" class="fade-in hidden">
+<div class="card p-5 mb-4">
+<h2 class="text-lg font-bold text-gray-800 mb-1">🎯 Target Role</h2>
+<p class="text-sm text-gray-500 mb-4">What kind of position are you applying for?</p>
+
+<label class="block text-sm font-bold text-gray-700 mb-1">Role Type *</label>
+<select id="roleType" class="input-field mb-3">
+<option value="">Select...</option>
+<option value="preschool_teacher">Preschool / Pre-K Teacher</option>
+<option value="toddler_teacher">Toddler Room Teacher</option>
+<option value="lead_teacher">Lead Teacher</option>
+<option value="assistant_teacher">Assistant Teacher</option>
+<option value="nanny">Nanny / Household Childcare</option>
+<option value="childcare_center_director">Childcare Center Director</option>
+<option value="infant_caregiver">Infant Caregiver</option>
+<option value="family_daycare">Family Daycare Provider</option>
+<option value="special_needs">Special Needs Aide / Inclusion Specialist</option>
+<option value="other">Other</option>
+</select>
+
+<label class="block text-sm font-bold text-gray-700 mb-1">Employer Type</label>
+<select id="employerType" class="input-field mb-3">
+<option value="">Select...</option>
+<option value="private_family">Private Family (Nanny)</option>
+<option value="daycare_center">Daycare Center / Childcare Center</option>
+<option value="preschool">Preschool / Montessori / Reggio</option>
+<option value="head_start">Head Start / Government Program</option>
+<option value="church_based">Church-Based / Faith-Based Program</option>
+<option value="corporate">Corporate Childcare</option>
+<option value="school_district">School District</option>
+</select>
+
+<label class="block text-sm font-bold text-gray-700 mb-1">Job Description (paste if available)</label>
+<textarea id="jobDescription" class="input-field mb-3" rows="3" placeholder="Paste the job listing here so we can tailor your documents specifically..."></textarea>
+
+<label class="block text-sm font-bold text-gray-700 mb-1">Document to Generate *</label>
+<div class="flex gap-3 mb-3">
+<button id="tab-resume" onclick="selectDocType('resume')" class="flex-1 py-3 rounded-xl font-bold text-sm tab-active">📄 Resume</button>
+<button id="tab-cover" onclick="selectDocType('cover_letter')" class="flex-1 py-3 rounded-xl font-bold text-sm tab-inactive">✉️ Cover Letter</button>
+<button id="tab-both" onclick="selectDocType('both')" class="flex-1 py-3 rounded-xl font-bold text-sm tab-inactive">📦 Both</button>
+</div>
+
+<label class="block text-sm font-bold text-gray-700 mb-1">Tone</label>
+<select id="tone" class="input-field mb-1">
+<option value="professional_warm">Professional & Warm (Recommended)</option>
+<option value="formal">Formal / Academic</option>
+<option value="casual_friendly">Casual & Friendly (Nanny roles)</option>
+<option value="confident">Confident & Assertive</option>
+</select>
+</div>
+<div class="flex gap-3">
+<button onclick="goToStep(2)" class="btn-secondary flex-1 py-3 text-base">← Back</button>
+<button onclick="generateDocuments()" id="generate-btn" class="btn-primary flex-1 py-3 text-base">✨ Generate!</button>
+</div>
+</div>
+
+<!-- STEP 4: Output -->
+<div id="step-4" class="fade-in hidden">
+<div id="loading-state" class="card p-8 text-center mb-4 hidden">
+<div class="spinner mx-auto mb-4"></div>
+<p class="text-gray-600 font-bold" id="loading-text">Crafting your documents...</p>
+<p class="text-sm text-gray-400 mt-2 pulse">🧠 Analyzing your experience & converting outcomes into measurable achievements</p>
+</div>
+
+<div id="output-state" class="hidden">
+<div id="resume-output" class="card p-5 mb-4 hidden">
+<div class="flex justify-between items-center mb-3">
+<h2 class="text-lg font-bold text-gray-800">📄 Your Resume</h2>
+<button onclick="copyToClipboard('resume-text')" class="text-sm font-bold text-pink-500 bg-pink-50 px-3 py-1 rounded-lg">📋 Copy</button>
+</div>
+<div id="resume-text" class="output-box"></div>
+</div>
+
+<div id="cover-output" class="card p-5 mb-4 hidden">
+<div class="flex justify-between items-center mb-3">
+<h2 class="text-lg font-bold text-gray-800">✉️ Your Cover Letter</h2>
+<button onclick="copyToClipboard('cover-text')" class="text-sm font-bold text-blue-500 bg-blue-50 px-3 py-1 rounded-lg">📋 Copy</button>
+</div>
+<div id="cover-text" class="output-box"></div>
+</div>
+
+<div id="achievements-output" class="card p-5 mb-4">
+<div class="flex justify-between items-center mb-3">
+<h2 class="text-lg font-bold text-gray-800">🏆 Suggested Achievements</h2>
+</div>
+<div id="achievements-text" class="text-sm text-gray-700 space-y-2"></div>
+</div>
+
+<div class="flex gap-3 mb-4">
+<button onclick="goToStep(3)" class="btn-secondary flex-1 py-3 text-base">← Edit & Retry</button>
+<button onclick="goToStep(1)" class="btn-primary flex-1 py-3 text-base">🔄 Start New</button>
+</div>
+</div>
+</div>
+
+<!-- Error toast container -->
+<div id="toast-container"></div>
+</div>
+
+<!-- Saved data indicator -->
+<div id="saved-indicator" class="fixed bottom-4 right-4 text-xs text-gray-400 bg-white px-3 py-1 rounded-full shadow hidden">
+💾 Auto-saved
+</div>
+
+<script>
+// Global AI tracking variables
+window.aiTotalInputTokens = 0;
+window.aiTotalOutputTokens = 0;
+window.aiTotalTime = 0;
+window.aiTimeByAlias = {};
+
+let currentStep = 1;
+let docType = 'resume';
+let selectedSkills = new Set();
+
+const defaultSkills = [
+'Toddler Care', 'Infant Care', 'Potty Training', 'Meal Prep', 'Sensory Play',
+'Circle Time', 'Behavior Management', 'Parent Communication', 'Developmental Screenings',
+'First Aid/CPR', 'Bilingual (Spanish)', 'Music & Movement', 'Art Projects',
+'Outdoor Play', 'Story Time', 'STEAM Activities', 'Montessori', 'Reggio Emilia',
+'Positive Discipline', 'Individualized Learning Plans', 'ASQ Screenings',
+'Diaper Changing', 'Sleep Training', 'Allergy Management'
+];
+
+function init() {
+renderSkillChips();
+loadFromStorage();
+setupAutoSave();
+setupCustomSkillInput();
+}
+
+function renderSkillChips() {
+const container = document.getElementById('skills-chips');
+container.innerHTML = '';
+const allSkills = [...new Set([...defaultSkills, ...selectedSkills])];
+allSkills.forEach(skill => {
+const chip = document.createElement('span');
+chip.className = `chip ${selectedSkills.has(skill) ? 'selected' : ''}`;
+chip.textContent = skill;
+chip.onclick = () => {
+if (selectedSkills.has(skill)) {
+selectedSkills.delete(skill);
+} else {
+selectedSkills.add(skill);
+}
+renderSkillChips();
+};
+container.appendChild(chip);
+});
+}
+
+function setupCustomSkillInput() {
+document.getElementById('customSkill').addEventListener('keydown', (e) => {
+if (e.key === 'Enter') {
+e.preventDefault();
+const val = e.target.value.trim();
+if (val) {
+selectedSkills.add(val);
+renderSkillChips();
+e.target.value = '';
+}
+}
+});
+}
+
+function selectDocType(type) {
+docType = type;
+['resume', 'cover', 'both'].forEach(t => {
+const el = document.getElementById(`tab-${t}`);
+el.className = el.className.replace(/tab-\w+/, type === t || (type === 'cover_letter' && t === 'cover') ? 'tab-active' : 'tab-inactive');
+});
+document.getElementById('tab-resume').className = `flex-1 py-3 rounded-xl font-bold text-sm ${type === 'resume' || type === 'both' ? 'tab-active' : 'tab-inactive'}`;
+document.getElementById('tab-cover').className = `flex-1 py-3 rounded-xl font-bold text-sm ${type === 'cover_letter' || type === 'both' ? 'tab-active' : 'tab-inactive'}`;
+document.getElementById('tab-both').className = `flex-1 py-3 rounded-xl font-bold text-sm ${type === 'both' ? 'tab-active' : 'tab-inactive'}`;
+}
+
+function goToStep(step) {
+if (step === 2 && currentStep === 1) {
+if (!document.getElementById('fullName').value.trim()) { showToast('Please enter your name ✏️'); return; }
+if (!document.getElementById('experience').value) { showToast('Please select your experience level 📅'); return; }
+if (!document.getElementById('education').value.trim()) { showToast('Please enter your education/certifications 🎓'); return; }
+}
+if (step === 3 && currentStep === 2) {
+if (!document.getElementById('workHistory').value.trim()) { showToast('Please enter your work history 💼'); return; }
+if (!document.getElementById('outcomes').value.trim()) { showToast('Please enter at least one child development outcome 🌟'); return; }
+}
+
+document.getElementById(`step-${currentStep}`).classList.add('hidden');
+document.getElementById(`step-${step}`).classList.remove('hidden');
+
+for (let i = 1; i <= 4; i++) {
+const ind = document.getElementById(`step-ind-${i}`);
+if (i < step) { ind.className = 'step-indicator step-done'; }
+else if (i === step) { ind.className = 'step-indicator step-active'; }
+else { ind.className = 'step-indicator step-pending'; }
+if (i < 4) {
+const line = document.getElementById(`step-line-${i}`);
+line.className = `w-8 h-1 rounded ${i < step ? 'bg-green-400' : 'bg-gray-200'}`;
+}
+}
+currentStep = step;
+saveToStorage();
+window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function gatherFormData() {
+return {
+fullName: document.getElementById('fullName').value.trim(),
+email: document.getElementById('email').value.trim(),
+phone: document.getElementById('phone').value.trim(),
+location: document.getElementById('location').value.trim(),
+experience: document.getElementById('experience').value,
+education: document.getElementById('education').value.trim(),
+licenses: document.getElementById('licenses').value.trim(),
+workHistory: document.getElementById('workHistory').value.trim(),
+outcomes: document.getElementById('outcomes').value.trim(),
+artifacts: document.getElementById('artifacts').value.trim(),
+skills: Array.from(selectedSkills),
+roleType: document.getElementById('roleType').value,
+employerType: document.getElementById('employerType').value,
+jobDescription: document.getElementById('jobDescription').value.trim(),
+tone: document.getElementById('tone').value,
+docType: docType
+};
+}
+
+async function callAI(prompt, retries = 3) {
+const startTime = Date.now();
+for (let attempt = 1; attempt <= retries; attempt++) {
+try {
+const response = await fetch('https://16504442930.work/run_prompt', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({
+alias: 'genericAI',
+params: { prompt: prompt }
+})
+});
+
+const data = await response.json();
+
+const elapsed = Date.now() - startTime;
+window.aiTotalTime += elapsed;
+window.aiTimeByAlias['genericAI'] = (window.aiTimeByAlias['genericAI'] || 0) + elapsed;
+
+if (data.input_tokens) window.aiTotalInputTokens += data.input_tokens;
+if (data.output_tokens) window.aiTotalOutputTokens += data.output_tokens;
+
+if (data.error) {
+if (attempt === retries) {
+const friendlyError = await formatError(data);
+throw new Error(friendlyError);
+}
+continue;
+}
+
+return data;
+} catch (err) {
+if (attempt === retries) {
+throw err;
+}
+}
+}
+}
+
+async function formatError(apiResponse) {
+try {
+const resp = await fetch('https://16504442930.work/run_prompt', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({
+alias: 'genericAI',
+params: {
+prompt: `You are a helpful assistant. An API call failed with the following response: ${JSON.stringify(apiResponse)}. Please reformat this into a user-friendly error message that: 1) explains what went wrong in simple terms, 2) suggests what the user can do to fix it, 3) includes the full original error for reference. Return a JSON object with exactly this structure: {"friendlyMessage": string (the user-friendly message), "suggestion": string (what they can do)}. Return ONLY valid JSON.`
+}
+})
+});
+const data = await resp.json();
+return `${data.friendlyMessage || 'Something went wrong.'} ${data.suggestion || 'Please try again.'}\n\nFull response: ${JSON.stringify(apiResponse)}`;
+} catch {
+return `An error occurred. Please try again.\n\nFull response: ${JSON.stringify(apiResponse)}`;
+}
+}
+
+async function generateDocuments() {
+const data = gatherFormData();
+if (!data.roleType) { showToast('Please select a role type 🎯'); return; }
+
+goToStep(4);
+document.getElementById('loading-state').classList.remove('hidden');
+document.getElementById('output-state').classList.add('hidden');
+
+const btn = document.getElementById('generate-btn');
+btn.disabled = true;
+
+const loadingTexts = [
+'Analyzing your experience... 🔍',
+'Converting outcomes to measurable achievements... 📊',
+'Tailoring language for your target role... 🎯',
+'Polishing your documents... ✨'
+];
+let textIdx = 0;
+const textInterval = setInterval(() => {
+textIdx = (textIdx + 1) % loadingTexts.length;
+document.getElementById('loading-text').textContent = loadingTexts[textIdx];
+}, 2500);
+
+try {
+// Generate achievements first
+const achievementsPrompt = `You are an expert early childhood education career coach and resume writer specializing in toddler-age pedagogy, licensing compliance, and measurable child development outcomes.
+
+Given the following educator profile, convert their classroom observations and child development outcomes into powerful, quantifiable resume achievement bullet points using domain-specific early childhood education language.
+
+EDUCATOR PROFILE:
+- Name: ${data.fullName}
+- Experience: ${data.experience} years
+- Education/Certifications: ${data.education}
+- Licenses: ${data.licenses}
+- Work History: ${data.workHistory}
+- Child Development Outcomes & Observations: ${data.outcomes}
+- Classroom Artifacts & Methods: ${data.artifacts}
+- Skills: ${data.skills.join(', ')}
+- Target Role: ${data.roleType}
+- Target Employer Type: ${data.employerType}
+
+Instructions:
+1. Convert each observation/outcome into a measurable achievement with numbers, percentages, or specific metrics where possible.
+2. Use toddler-pedagogy specific language (e.g., "developmental milestones," "age-appropriate scaffolding," "emergent curriculum," "responsive caregiving").
+3. Emphasize regulatory compliance, safety protocols, and licensing standards.
+4. Tailor achievements for the specific role type and employer type.
+5. Generate at least 8 achievement bullet points.
+
+Return ONLY valid JSON with exactly this structure:
+{
+  "achievements": [string, string, string, ...] (array of 8-12 achievement bullet point strings, each starting with a strong action verb),
+  "keywords": [string, string, ...] (array of 10-15 industry-specific keywords that should appear in the resume)
+}`;
+
+const achievementsResult = await callAI(achievementsPrompt);
+const achievements = achievementsResult.achievements || [];
+const keywords = achievementsResult.keywords || [];
+
+// Generate resume if needed
+let resumeText = '';
+if (data.docType === 'resume' || data.docType === 'both') {
+const resumePrompt = `You are an expert early childhood education resume writer. Create a complete, professionally formatted resume in plain text format.
+
+EDUCATOR PROFILE:
+- Name: ${data.fullName}
+- Email: ${data.email}
+- Phone: ${data.phone}
+- Location: ${data.location}
+- Experience: ${data.experience} years
+- Education/Certifications: ${data.education}
+- Licenses: ${data.licenses}
+- Work History: ${data.workHistory}
+- Child Development Outcomes: ${data.outcomes}
+- Classroom Methods: ${data.artifacts}
+- Skills: ${data.skills.join(', ')}
+- Target Role: ${data.roleType.replace(/_/g, ' ')}
+- Target Employer: ${data.employerType.replace(/_/g, ' ')}
+- Tone: ${data.tone.replace(/_/g, ' ')}
+
+ACHIEVEMENTS TO INCORPORATE:
+${achievements.map((a, i) => `${i + 1}. ${a}`).join('\n')}
+
+KEYWORDS TO INCLUDE NATURALLY:
+${keywords.join(', ')}
+
+${data.jobDescription ? `JOB DESCRIPTION TO TAILOR TO:\n${data.jobDescription}\n` : ''}
+
+Instructions:
+1. Create a complete resume with sections: Professional Summary, Experience, Education & Certifications, Skills, and Licenses & Compliance.
+2. Use the achievements provided - incorporate them into the experience section.
+3. The professional summary should be 3-4 sentences highlighting toddler-specific expertise.
+4. Format for easy reading with clear section headers.
+5. Optimize for ATS (applicant tracking systems) using the keywords naturally.
+6. Use the specified tone throughout.
+
+Return ONLY valid JSON with this exact structure:
+{
+  "resume": string (the complete resume as formatted plain text with line breaks using \\n)
+}`;
+
+const resumeResult = await callAI(resumePrompt);
+resumeText = resumeResult.resume || '';
+}
+
+// Generate cover letter if needed
+let coverText = '';
+if (data.docType === 'cover_letter' || data.docType === 'both') {
+const coverPrompt = `You are an expert early childhood education career coach. Write a compelling cover letter.
+
+EDUCATOR PROFILE:
+- Name: ${data.fullName}
+- Experience: ${data.experience} years
+- Education/Certifications: ${data.education}
+- Licenses: ${data.licenses}
+- Key Outcomes: ${data.outcomes}
+- Skills: ${data.skills.join(', ')}
+- Target Role: ${data.roleType.replace(/_/g, ' ')}
+- Target Employer Type: ${data.employerType.replace(/_/g, ' ')}
+- Tone: ${data.tone.replace(/_/g, ' ')}
+
+TOP ACHIEVEMENTS:
+${achievements.slice(0, 5).map((a, i) => `${i + 1}. ${a}`).join('\n')}
+
+${data.jobDescription ? `JOB DESCRIPTION:\n${data.jobDescription}\n` : ''}
+
+Instructions:
+1. Write a 3-4 paragraph cover letter (not counting greeting/closing).
+2. Open with enthusiasm for working with toddlers and young children.
+3. Highlight 2-3 specific measurable achievements.
+4. Reference regulatory compliance and safety awareness.
+5. Show understanding of the specific employer type's priorities.
+6. Close with a confident but warm call to action.
+7. Use the specified tone.
+8. If a job description was provided, directly reference it.
+
+Return ONLY valid JSON with this exact structure:
+{
+  "coverLetter": string (the complete cover letter as formatted plain text with line breaks using \\n)
+}`;
+
+const coverResult = await callAI(coverPrompt);
+coverText = coverResult.coverLetter || '';
+}
+
+clearInterval(textInterval);
+document.getElementById('loading-state').classList.add('hidden');
+document.getElementById('output-state').classList.remove('hidden');
+
+// Display resume
+if (resumeText) {
+document.getElementById('resume-output').classList.remove('hidden');
+document.getElementById('resume-text').textContent = resumeText;
+} else {
+document.getElementById('resume-output').classList.add('hidden');
+}
+
+// Display cover letter
+if (coverText) {
+document.getElementById('cover-output').classList.remove('hidden');
+document.getElementById('cover-text').textContent = coverText;
+} else {
+document.getElementById('cover-output').classList.add('hidden');
+}
+
+// Display achievements
+const achContainer = document.getElementById('achievements-text');
+achContainer.innerHTML = '';
+if (achievements.length > 0) {
+achievements.forEach(a => {
+const div = document.createElement('div');
+div.className = 'flex items-start gap-2 p-2 bg-green-50 rounded-lg';
+div.innerHTML = `<span class="text-green-500 mt-0.5">✅</span><span class="text-sm">${a}</span>`;
+achContainer.appendChild(div);
+});
+if (keywords.length > 0) {
+const kwDiv = document.createElement('div');
+kwDiv.className = 'mt-4 p-3 bg-yellow-50 rounded-lg';
+kwDiv.innerHTML = `<p class="text-xs font-bold text-yellow-700 mb-2">🔑 Recommended Keywords:</p><div class="flex flex-wrap gap-1">${keywords.map(k => `<span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">${k}</span>`).join('')}</div>`;
+achContainer.appendChild(kwDiv);
+}
+document.getElementById('achievements-output').classList.remove('hidden');
+}
+
+// Save generated documents
+saveToStorage();
+showToast('Documents generated! 🎉');
+
+} catch (err) {
+clearInterval(textInterval);
+document.getElementById('loading-state').classList.add('hidden');
+showToast(`Error: ${err.message}`, true);
+goToStep(3);
+} finally {
+btn.disabled = false;
+}
+}
+
+function copyToClipboard(elementId) {
+const text = document.getElementById(elementId).textContent;
+navigator.clipboard.writeText(text).then(() => {
+showToast('Copied to clipboard! 📋');
+}).catch(() => {
+// Fallback
+const textarea = document.createElement('textarea');
+textarea.value = text;
+document.body.appendChild(textarea);
+textarea.select();
+document.execCommand('copy');
+document.body.removeChild(textarea);
+showToast('Copied to clipboard! 📋');
+});
+}
+
+function showToast(message, isError = false) {
+const container = document.getElementById('toast-container');
+const toast = document.createElement('div');
+toast.className = 'toast';
+if (isError) toast.style.background = '#EF4444';
+toast.textContent = message;
+container.appendChild(toast);
+setTimeout(() => {
+toast.style.opacity = '0';
+toast.style.transition = 'opacity 0.3s';
+setTimeout(() => toast.remove(), 300);
+}, 3000);
+}
+
+function saveToStorage() {
+const data = {
+fullName: document.getElementById('fullName').value,
+email: document.getElementById('email').value,
+phone: document.getElementById('phone').value,
+location: document.getElementById('location').value,
+experience: document.getElementById('experience').value,
+education: document.getElementById('education').value,
+licenses: document.getElementById('licenses').value,
+workHistory: document.getElementById('workHistory')?.value || '',
+outcomes: document.getElementById('outcomes')?.value || '',
+artifacts: document.getElementById('artifacts')?.value || '',
+selectedSkills: Array.from(selectedSkills),
+roleType: document.getElementById('roleType')?.value || '',
+employerType: document.getElementById('employerType')?.value || '',
+jobDescription: document.getElementById('jobDescription')?.value || '',
+tone: document.getElementById('tone')?.value || 'professional_warm',
+docType: docType
+};
+localStorage.setItem('ecrt_data', JSON.stringify(data));
+const indicator = document.getElementById('saved-indicator');
+indicator.classList.remove('hidden');
+setTimeout(() => indicator.classList.add('hidden'), 2000);
+}
+
+function loadFromStorage() {
+const saved = localStorage.getItem('ecrt_data');
+if (!saved) return;
+try {
+const data = JSON.parse(saved);
+if (data.fullName) document.getElementById('fullName').value = data.fullName;
+if (data.email) document.getElementById('email').value = data.email;
+if (data.phone) document.getElementById('phone').value = data.phone;
+if (data.location) document.getElementById('location').value = data.location;
+if (data.experience) document.getElementById('experience').value = data.experience;
+if (data.education) document.getElementById('education').value = data.education;
+if (data.licenses) document.getElementById('licenses').value = data.licenses;
+if (data.workHistory) document.getElementById('workHistory').value = data.workHistory;
+if (data.outcomes) document.getElementById('outcomes').value = data.outcomes;
+if (data.artifacts) document.getElementById('artifacts').value = data.artifacts;
+if (data.selectedSkills) {
+data.selectedSkills.forEach(s => selectedSkills.add(s));
+renderSkillChips();
+}
+if (data.roleType) document.getElementById('roleType').value = data.roleType;
+if (data.employerType) document.getElementById('employerType').value = data.employerType;
+if (data.jobDescription) document.getElementById('jobDescription').value = data.jobDescription;
+if (data.tone) document.getElementById('tone').value = data.tone;
+if (data.docType) {
+docType = data.docType;
+selectDocType(docType);
+}
+} catch (e) {
+// Ignore parse errors
+}
+}
+
+function setupAutoSave() {
+const fields = ['fullName', 'email', 'phone', 'location', 'experience', 'education', 'licenses',
+'workHistory', 'outcomes', 'artifacts', 'roleType', 'employerType', 'jobDescription', 'tone'];
+fields.forEach(id => {
+const el = document.getElementById(id);
+if (el) {
+el.addEventListener('input', debounce(saveToStorage, 1000));
+el.addEventListener('change', saveToStorage);
+}
+});
+}
+
+function debounce(fn, ms) {
+let timer;
+return function (...args) {
+clearTimeout(timer);
+timer = setTimeout(() => fn.apply(this, args), ms);
+};
+}
+
+init();
+</script>
+</body>
+</html>
